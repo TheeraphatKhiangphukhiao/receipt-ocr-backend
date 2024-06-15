@@ -41,9 +41,14 @@ async def read_makro():
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_makro_receipt_information(file: UploadFile):
     imRGB = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
-    imGray = await convert_to_grayscale(imRGB)
+    imGray = await convert_to_grayscale(imRGB) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพระดับเทา
     
-    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1]
+    #เเปลงภาพระดับเทาให้เป็นภาพเเบบ binary
+    #THRESH_BINARY_INV : เเปลงพิกเซลที่มีค่าน้อยกว่า threshold ให้เป็นสีขาว 255 และพิกเซลที่มีค่ามากกว่า threshold ให้เป็นสีดำ 0
+    #THRESH_OTSU : คำนวณหา threshold โดยวิธี Otsu
+    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1] #คำตอบที่ได้จะเป็น tuple ที่ประกอบด้วยค่า threshold และภาพที่ผ่านการ threshold ซึ่งเราสนใจแค่ภาพเลยใช้ [1] เพื่อเลือกเฉพาะภาพนั้นมาใช้งาน
+    print(thresh)
+
     noise_reduced = cv.medianBlur(thresh, 3)
     sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
     resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
@@ -53,12 +58,12 @@ async def extract_makro_receipt_information(file: UploadFile):
     # cv.namedWindow('normalized image', cv.WINDOW_NORMAL)
     # cv.imshow('normalized image', normalized_image) # คำสั่งเเสดงผลภาพ
 
-    cv.namedWindow('resized', cv.WINDOW_NORMAL)
-    cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
+    # cv.namedWindow('resized', cv.WINDOW_NORMAL)
+    # cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
 
-    cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
-    cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
+    # cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
+    # cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
     
-    # text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
-    # text = text.splitlines()
-    # return {"message": text}
+    text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    text = text.splitlines()
+    return {"message": text}
