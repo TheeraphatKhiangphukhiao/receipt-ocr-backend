@@ -51,6 +51,9 @@ async def extract_makro_receipt_information(file: UploadFile):
     
     noise_reduced = cv.medianBlur(thresh, 3) #ทำการลด noise โดยใช้ฟิลเตอร์แบบ median blur กับภาพเเละใช้ kernel 3x3
     sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
+
+    #ทำการเพิ่มขนาดของรูปภาพให้ใหญ่ขึ้น 1.5 เท่าในเเกน x เเละ 1.5 เท่าในเเกน y
+    #interpolation=cv.INTER_LINEAR : ใช้การ interpolation แบบ linear เพื่อเพิ่มความละเอียดของภาพ
     resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
     
     # cv.namedWindow('imRGB', cv.WINDOW_NORMAL)
