@@ -48,8 +48,8 @@ async def extract_makro_receipt_information(file: UploadFile):
     #THRESH_OTSU : คำนวณหา threshold โดยวิธี Otsu
     thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1] #คำตอบที่ได้จะเป็น tuple ที่ประกอบด้วยค่า threshold และภาพที่ผ่านการ threshold ซึ่งเราสนใจแค่ภาพเลยใช้ [1] เพื่อเลือกเฉพาะภาพนั้นมาใช้งาน
     print(thresh)
-
-    noise_reduced = cv.medianBlur(thresh, 3)
+    
+    noise_reduced = cv.medianBlur(thresh, 3) #ทำการลด noise โดยใช้ฟิลเตอร์แบบ median blur กับภาพเเละใช้ kernel 3x3
     sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
     resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
     
