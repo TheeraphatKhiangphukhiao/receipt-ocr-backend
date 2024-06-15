@@ -1,0 +1,64 @@
+from fastapi import APIRouter, status, UploadFile #เพื่อใช้ในการสร้างเส้นทางของ API
+import cv2 as cv #สำหรับประมวลผลภาพล่วงหน้า
+import numpy as np
+import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
+import re 
+
+router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
+
+#ฟังก์ชันเพื่ออ่านไฟล์รูปภาพที่อัปโหลด โดยใช้ OpenCV เพื่อแปลงภาพเป็น grayscale
+async def create_upload_file(file):
+    content = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์ที่ได้รับมาเป็น byte string โดยใช้การอ่านแบบ asynchronous
+    nparr = np.frombuffer(content, np.uint8) #เเปลงข้อมูล byte string ในตัวเเปร content เป็น array ของตัวเลข 8-bit unsigned integers
+    imRGB = cv.imdecode(nparr, cv.IMREAD_COLOR) #เพื่อเเปลง array ของตัวเลขที่เก็บใน nparr ให้เป็นภาพสี RGB
+    imGray = cv.cvtColor(imRGB, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
+    return imRGB #ส่งรูปภาพกลับไป
+
+#ฟังก์ชั่นสำหรับปรับค่า pixel ของภาพให้อยู่ในช่วงที่ต้องการโดยการกำหนดจาก 0 - 255 เป็นค่าความเข้มของสีในระบบ RGB
+async def normalize_image(imRGB):
+    normalized_image = cv.normalize(imRGB, None, 0, 255, cv.NORM_MINMAX) #None หมายถึงสำหรับสร้าง output array ใหม่
+    return normalized_image
+
+#ฟังก์ชั่นสำหรับปรับขนาดรูปภาพให้เป็นขนาดมาตรฐาน เพื่อให้เเน่ใจว่ามีความสมํ่าเสมอ
+async def scale_image(image, width):
+    scale_ratio = width / image.shape[1] #เอา 800 หารด้วย จำนวนคอลัมน์ของ image ที่เป็นภาพสี RGB
+    #ตัวอย่าง หลังจากผ่านคำสั่ง resize
+    # shape เริ่มต้น = (3501, 2550, 3) = (row, column, 3)
+    # shape ผลลัพธ์ = (1098, 800, 3) = (row, column, 3)
+    scaled_image = cv.resize(image, (width, int(image.shape[0] * scale_ratio)))
+    return scaled_image
+
+#ฟังก์ชั่นสำหรับเเปลงรูปภาพเป็น รูปภาพระดับเทา
+async def convert_to_grayscale(image):
+    imGray = cv.cvtColor(image, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
+    return imGray
+
+@router.get("/", status_code=status.HTTP_200_OK)
+async def read_makro():
+    return {"message": "This is the makro endpoint"}
+
+
+@router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
+async def extract_makro_receipt_information(file: UploadFile):
+    imRGB = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
+    imGray = await convert_to_grayscale(imRGB)
+    
+    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1]
+    noise_reduced = cv.medianBlur(thresh, 3)
+    sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
+    resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
+    
+    # cv.namedWindow('imRGB', cv.WINDOW_NORMAL)
+    # cv.imshow('imRGB', imRGB) # คำสั่งเเสดงผลภาพ
+    # cv.namedWindow('normalized image', cv.WINDOW_NORMAL)
+    # cv.imshow('normalized image', normalized_image) # คำสั่งเเสดงผลภาพ
+
+    cv.namedWindow('resized', cv.WINDOW_NORMAL)
+    cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
+
+    cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
+    cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
+    
+    # text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    # text = text.splitlines()
+    # return {"message": text}
