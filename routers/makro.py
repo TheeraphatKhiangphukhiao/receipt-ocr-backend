@@ -6,6 +6,7 @@ import re
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 
+
 #ฟังก์ชันเพื่ออ่านไฟล์รูปภาพที่อัปโหลด โดยใช้ OpenCV เพื่อแปลงภาพเป็น grayscale
 async def create_upload_file(file):
     content = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์ที่ได้รับมาเป็น byte string โดยใช้การอ่านแบบ asynchronous
@@ -50,23 +51,25 @@ async def extract_makro_receipt_information(file: UploadFile):
     print(thresh)
     
     noise_reduced = cv.medianBlur(thresh, 3) #ทำการลด noise โดยใช้ฟิลเตอร์แบบ median blur กับภาพเเละใช้ kernel 3x3
+
+    #เพิ่มความคมชัด
     sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
 
     #ทำการเพิ่มขนาดของรูปภาพให้ใหญ่ขึ้น 1.5 เท่าในเเกน x เเละ 1.5 เท่าในเเกน y
     #interpolation=cv.INTER_LINEAR : ใช้การ interpolation แบบ linear เพื่อเพิ่มความละเอียดของภาพ
     resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
     
-    # cv.namedWindow('imRGB', cv.WINDOW_NORMAL)
-    # cv.imshow('imRGB', imRGB) # คำสั่งเเสดงผลภาพ
-    # cv.namedWindow('normalized image', cv.WINDOW_NORMAL)
-    # cv.imshow('normalized image', normalized_image) # คำสั่งเเสดงผลภาพ
-
     # cv.namedWindow('resized', cv.WINDOW_NORMAL)
     # cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
-
     # cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
     # cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
     
     text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
-    text = text.splitlines()
-    return {"message": text}
+    text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
+    
+    for index in range(len(text)):
+        if re.compile(r'^\d+\s+\d{13}').search(text[index]):
+            print(text[index])
+        elif re.compile(r'ชำระโดย').search(text[index]):
+            print(text[index])
+            break
