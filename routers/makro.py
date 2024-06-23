@@ -55,9 +55,11 @@ async def extract_makro_receipt_information(file: UploadFile):
     text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
     
-    for index in range(len(text)):
+    for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
+
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
-            print(text[index])
+            
+            words = text[index].split()
+            print(words)
         elif re.compile(r'ชำระโดย').search(text[index]):
-            print(text[index])
-            break
+            break #ถ้าวนลูปจนถึงเเถว
