@@ -33,11 +33,14 @@ async def extract_makro_receipt_information(file: UploadFile):
     imGray = await convert_to_grayscale(imRGB) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพระดับเทา
 
     imGray = cv.equalizeHist(imGray)
-
-    scale_percent = 150
     
-    cv.namedWindow('imGray', cv.WINDOW_NORMAL)
-    cv.imshow('imGray', imGray) # คำสั่งเเสดงผลภาพ
+    scale_percent = 150
+    width = int(imGray.shape[1] * scale_percent / 100)
+    height = int(imGray.shape[0] * scale_percent / 100)
+    rescaled = cv.resize(imGray, (width, height), interpolation=cv.INTER_LINEAR)
+    
+    cv.namedWindow('rescaled', cv.WINDOW_NORMAL)
+    cv.imshow('rescaled', rescaled) # คำสั่งเเสดงผลภาพ
 
     cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
     cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
