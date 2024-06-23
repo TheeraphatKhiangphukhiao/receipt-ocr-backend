@@ -38,9 +38,11 @@ async def extract_makro_receipt_information(file: UploadFile):
     width = int(imGray.shape[1] * scale_percent / 100)
     height = int(imGray.shape[0] * scale_percent / 100)
     rescaled = cv.resize(imGray, (width, height), interpolation=cv.INTER_LINEAR)
+
+    blur = cv.GaussianBlur(rescaled, (5, 5), 0)
     
-    cv.namedWindow('rescaled', cv.WINDOW_NORMAL)
-    cv.imshow('rescaled', rescaled) # คำสั่งเเสดงผลภาพ
+    cv.namedWindow('blur', cv.WINDOW_NORMAL)
+    cv.imshow('blur', blur) # คำสั่งเเสดงผลภาพ
 
     cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
     cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
