@@ -29,6 +29,8 @@ async def read_makro():
 
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_makro_receipt_information(file: UploadFile):
+    result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
+
     imRGB = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
     imGray = await convert_to_grayscale(imRGB) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพระดับเทา
     
@@ -55,11 +57,26 @@ async def extract_makro_receipt_information(file: UploadFile):
     text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
     
+    #กำหนด pattern สำหรับเก็บข้อมูล
+    result.append({
+        "item1": "จำนวน",
+        "item2": "รหัสสินค้า",
+        "item3": "รายการสินค้า"
+    })
+    
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
 
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
-            
-            words = text[index].split()
+
+            words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
             print(words)
+            result.append({
+                "item1": words[0],
+                "item2": words[1],
+                "item3": " ".join(words[2:-4]) #การ join หมายความว่านำข้อมูลใน List มารวมกันเเละเเทนที่ช่องที่ต่อกันด้วย " " หรือจะใส่ "-"
+            })
+            
         elif re.compile(r'ชำระโดย').search(text[index]):
-            break #ถ้าวนลูปจนถึงเเถว
+            break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
+
+    return {"result": result}
