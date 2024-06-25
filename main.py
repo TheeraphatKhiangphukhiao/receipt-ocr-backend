@@ -4,6 +4,7 @@ from routers.lotus import router as lotus_router #นำเข้าเส้น
 from routers.bigc import router as bigc_router #นำเข้าเส้นทางจากไฟล์ routers.bigc
 from routers.makro import router as makro_router #นำเข้าเส้นทางจากไฟล์ routers.makro
 from routers.index import router as index_router #นำเข้าเส้นทางจากไฟล์ routers.index
+from routers.upload import router as upload_router #นำเข้าเส้นทางจากไฟล์ routers.upload
 from fastapi.middleware.cors import CORSMiddleware #เพื่อจัดการกับ Cross-Origin Resource Sharing (CORS) เป็นเทคโนโลยีที่อนุญาตให้เว็บแอปพลิเคชันทำงานร่วมกับแหล่งที่มาจากโดเมนอื่นๆ
 
 app = FastAPI() #สร้าง instance ของ FastAPI application
@@ -21,6 +22,7 @@ app.include_router(index_router, prefix="/index") #เส้นทางทั�
 app.include_router(lotus_router, prefix="/lotus") #เส้นทางทั้งหมดใน lotus_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/lotus"
 app.include_router(bigc_router, prefix="/bigc") #เส้นทางทั้งหมดใน bigc_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/bigc"
 app.include_router(makro_router, prefix="/makro") #เส้นทางทั้งหมดใน makro_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/makro"
+app.include_router(upload_router, prefix="/upload") #เส้นทางทั้งหมดใน upload_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/upload"
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def read_root():
