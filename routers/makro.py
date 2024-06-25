@@ -61,7 +61,8 @@ async def extract_makro_receipt_information(file: UploadFile):
     result.append({
         "item1": "จำนวน",
         "item2": "รหัสสินค้า",
-        "item3": "รายการสินค้า"
+        "item3": "รายการสินค้า",
+        "item4": "ราคาต่อหน่วย"
     })
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
@@ -71,9 +72,10 @@ async def extract_makro_receipt_information(file: UploadFile):
             words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
             print(words)
             result.append({
-                "item1": words[0],
-                "item2": words[1],
-                "item3": " ".join(words[2:-4]) #การ join หมายความว่านำข้อมูลใน List มารวมกันเเละเเทนที่ช่องที่ต่อกันด้วย " " หรือจะใส่ "-"
+                "item1": words[0], #เพิ่มจำนวน
+                "item2": words[1], #เพิ่มรหัสสินค้า
+                "item3": " ".join(words[2:-4]), #เพิ่มรายการสินค้า, การ join หมายความว่านำข้อมูลใน List มารวมกันเเละเเทนที่ช่องที่ต่อกันด้วย " " หรือจะใส่ "-"
+                "item4": words[-3] #เพิ่มราคาต่อหน่วย, การใช้ตัวเลขติดลบในการเข้าถึงสมาชิกของ List จะเป็นการเข้าถึงสมาชิกจากท้ายสุดมา -3 หมายถึงสมาชิกตัวที่สามจากด้านท้ายสุดของ List
             })
             
         elif re.compile(r'ชำระโดย').search(text[index]):
