@@ -10,26 +10,36 @@ async def read_upload():
     return {"message": "This is the upload endpoint"}
  
 
+#เส้นทางสำหรับนำข้อมูลส่วนสำคัญของใบเสร็จมาเขียนเป็นไฟล์ csv เเละส่งไฟล์นั้นกลับไปยังผู้เรียก API
 @router.post("/save/receipt", status_code=status.HTTP_201_CREATED)
-async def save_receipt(Receipt_data: Request):
-    items = await Receipt_data.json() 
-    all_keys = set()
-    for item in items['result']: 
-        if isinstance(item, dict):
-            all_keys.update(item.keys())
-    sorted_keys = sorted(all_keys)
-    # data rows of csv file
-    rows = []
-    for item in items['result']: 
-        row = [item.get(key, '') for key in sorted_keys]
-        rows.append(row)
+async def save_receipt(receipt_data: Request):
+
+    items = await receipt_data.json() #ดึงข้อมูลจากตัวเเปร receipt_data ในรูปเเบบ json
+    print(items)
+
+    all_keys = set() #ประกาศตัวเเปรชนิด set, set นั้นจะมีสมาชิกไม่ซํ้ากัน, set ไม่มีการจัดเรียงลำดับของสมาชิก, สามารถเพิ่มหรือลบสมาชิกใน set ได้
+    print(all_keys) #set()
+
+    for item in items['result']: #วนลูปนำข้อมูล json เเต่ละเเถวของ result ออกมา, ซึ่ง result มีชนิดเป็น List ที่เก็บ json หลายๆตัว
+
+        # isinstance(object, classinfo)
+        # object : วัตถุหรือตัวเเปรที่ต้องการตรวจสอบ
+        # classinfo : ประเภทหรือคลาสที่ต้องการตรวจสอบ
+        if isinstance(item, dict): #ตรวจสอบว่าตัวเเปร item มีชนิดเป็น dictionary หรือไม่
+            all_keys.update(item.keys()) #ถ้าเป็นจริงทำการเพิ่ม key ของข้อมูล json เเต่ละเเถว
+    sorted_keys = sorted(all_keys) #เรียงลำดับสมาชิกทั้งหมดในตัวเเปร all_keys เเล้วเก็บไว้ในตัวเเปร sorted_keys
+
+    # rows = []
+    # for item in items['result']: 
+    #     row = [item.get(key, '') for key in sorted_keys]
+    #     rows.append(row)
       
-    filename = r"uploads\Receipt.csv"
-    with open(filename, 'w', encoding='utf-8') as csvfile:
-        csvwriter = csv.writer(csvfile)
-        #csvwriter.writerow([items['result'][0]['item1']])
-        csvwriter.writerows(rows)
-    try:
-        return FileResponse(path=filename, media_type='text/csv', filename=filename)
-    except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="File not found.")
+    # filename = r"uploads\Receipt.csv"
+    # with open(filename, 'w', encoding='utf-8') as csvfile:
+    #     csvwriter = csv.writer(csvfile)
+    #     #csvwriter.writerow([items['result'][0]['item1']])
+    #     csvwriter.writerows(rows)
+    # try:
+    #     return FileResponse(path=filename, media_type='text/csv', filename=filename)
+    # except FileNotFoundError:
+    #     raise HTTPException(status_code=404, detail="File not found.")
