@@ -33,12 +33,13 @@ async def save_receipt(receipt_data: Request):
         row = [item.get(key, '') for key in sorted_keys] #ดึงค่าของ item โดยใช้ key
         rows.append(row) #ทำการเพิ่มข้อมูลทีละเเถวเข้าไปที่ rows, คำตอบจะได้เป็น List ซ้อน List
 
-    # filename = r"uploads\Receipt.csv"
-    # with open(filename, 'w', encoding='utf-8') as csvfile:
-    #     csvwriter = csv.writer(csvfile)
-    #     #csvwriter.writerow([items['result'][0]['item1']])
-    #     csvwriter.writerows(rows)
-    # try:
-    #     return FileResponse(path=filename, media_type='text/csv', filename=filename)
-    # except FileNotFoundError:
-    #     raise HTTPException(status_code=404, detail="File not found.")
+
+    filename = r"uploads\Receipt.csv" #ที่อยู่สำหรับเก็บไฟล์ 
+
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile: #w หมายถึงโหมดเขียน, newline='' หมายถึงไม่ให้เพิ่มบรรทัดว่างโดยอัตโนมัติเมื่อเขียนลงไฟล์
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerows(rows)
+    try:
+        return FileResponse(path=filename, media_type='text/csv', filename=filename)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="File not found.")
