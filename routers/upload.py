@@ -21,7 +21,6 @@ async def save_receipt(receipt_data: Request):
     print(all_keys) #set()
 
     for item in items['result']: #วนลูปนำข้อมูล json เเต่ละเเถวของ result ออกมา, ซึ่ง result มีชนิดเป็น List ที่เก็บ json หลายๆตัว
-
         # isinstance(object, classinfo)
         # object : วัตถุหรือตัวเเปรที่ต้องการตรวจสอบ
         # classinfo : ประเภทหรือคลาสที่ต้องการตรวจสอบ
@@ -29,11 +28,11 @@ async def save_receipt(receipt_data: Request):
             all_keys.update(item.keys()) #ถ้าเป็นจริงทำการเพิ่ม key ของข้อมูล json เเต่ละเเถว
     sorted_keys = sorted(all_keys) #เรียงลำดับสมาชิกทั้งหมดในตัวเเปร all_keys เเล้วเก็บไว้ในตัวเเปร sorted_keys
 
-    # rows = []
-    # for item in items['result']: 
-    #     row = [item.get(key, '') for key in sorted_keys]
-    #     rows.append(row)
-      
+    rows = [] #ประกาศตัวเเปร List สำหรับเก็บข้อมูลเป็นตาราง
+    for item in items['result']: #วนลูปนำข้อมูล json เเต่ละเเถวของ result ออกมา, ซึ่ง result มีชนิดเป็น List ที่เก็บ json หลายๆตัว
+        row = [item.get(key, '') for key in sorted_keys] #ดึงค่าของ item โดยใช้ key
+        rows.append(row) #ทำการเพิ่มข้อมูลทีละเเถวเข้าไปที่ rows, คำตอบจะได้เป็น List ซ้อน List
+
     # filename = r"uploads\Receipt.csv"
     # with open(filename, 'w', encoding='utf-8') as csvfile:
     #     csvwriter = csv.writer(csvfile)
