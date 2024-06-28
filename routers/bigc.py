@@ -1,8 +1,10 @@
 from fastapi import APIRouter, status, UploadFile #เพื่อใช้ในการสร้างเส้นทางของ API
 import cv2 as cv #สำหรับประมวลผลภาพล่วงหน้า
 import numpy as np
-import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
 import re 
+import sys
+sys.path.append('../') #เพื่อให้ python รู้จักเส้นทางของไฟล์ setup_ocr.py
+from setup_ocr import pytesseract #นำเข้าเส้นทางของ ocr จากไฟล์ setup_ocr.py
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 

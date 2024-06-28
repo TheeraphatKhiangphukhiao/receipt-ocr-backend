@@ -1,10 +1,13 @@
 from fastapi import APIRouter, status, UploadFile #เพื่อใช้ในการสร้างเส้นทางของ API
 import cv2 as cv #สำหรับประมวลผลภาพล่วงหน้า
 import numpy as np
-import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
 import re 
+import sys
+sys.path.append('../') #เพื่อให้ python รู้จักเส้นทางของไฟล์ setup_ocr.py
+from setup_ocr import pytesseract #นำเข้าเส้นทางของ ocr จากไฟล์ setup_ocr.py
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
+
 
 #ฟังก์ชันเพื่ออ่านไฟล์รูปภาพที่อัปโหลด โดยใช้ OpenCV เพื่อแปลงภาพเป็น grayscale
 async def create_upload_file(file):
@@ -14,9 +17,11 @@ async def create_upload_file(file):
     imGray = cv.cvtColor(imRGB, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
     return imGray #ส่งรูปภาพกลับไป
 
+
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_index():
     return {"message": "This is the index endpoint"}
+
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
 @router.post("/receipt/identify", status_code=status.HTTP_200_OK)
