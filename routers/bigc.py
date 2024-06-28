@@ -69,11 +69,14 @@ async def extract_bigc_receipt_information(file: UploadFile):
         "item8": "จำนวนเงิน (รวม VAT)"
     })
     
-    for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
+    for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List 
         number = 0
         over = ""
+        product_name = "" #ประกาศตัวเเปรสำหรับสร้างรายการสินค้าที่มีการ join ข้อมูลใน List
 
         if re.compile(r'^\d+.\d+\s+\d{13}').search(text[index]):
+            words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
+            #print(words)
             
             count = 1
             while True:
@@ -84,15 +87,17 @@ async def extract_bigc_receipt_information(file: UploadFile):
                     break
 
             if (not re.compile(r'^\d+.\d+\s+\d{13}').search(text[index+number])) and (not re.compile(r'ออกแทนใบกํากับภาษีอย่างย่อ').search(text[index+number])):
-                print(text[index+number])
-                over = text[index+number]
+                over = text[index+number] #นำข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆออกมา
+                product_name = " ".join(words[2:-3]) + over
 
-            words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
-            #print(words)
+            else: #กรณีที่ไม่มีข้อความเกินจนขึ้นบรรทัดใหม่
+                print("กรณีที่ไม่มีข้อความเกินจนขึ้นบรรทัดใหม่")
+                product_name = " ".join(words[2:-3]) #เพิ่มรายการสินค้า, การ join หมายความว่านำข้อมูลใน List มารวมกันเเละเเทนที่ช่องที่ต่อกันด้วย " " หรือจะใส่ "-"
+
             result.append({
                 "item1": words[0], #เพิ่มจำนวน
                 "item2": words[1], #เพิ่มรหัสสินค้า
-                "item3": " ".join(words[2:-3]) + " " + over, #เพิ่มรายการสินค้า, การ join หมายความว่านำข้อมูลใน List มารวมกันเเละเเทนที่ช่องที่ต่อกันด้วย " " หรือจะใส่ "-"
+                "item3": product_name, #เพิ่มรายการสินค้า
                 "item4": "", #เนื่องจากใบเสร็จ big c ไม่มี column สำหรับข้อมูลหน่วยบรรจุ ดังนั้นจึงใส่ค่าว่าง
                 "item5": words[-3], #เพิ่มราคาต่อหน่วย (รวม VAT), การใช้ตัวเลขติดลบในการเข้าถึงสมาชิกของ List จะเป็นการเข้าถึงสมาชิกจากท้ายสุดมา -3 หมายถึงสมาชิกตัวที่สามจากด้านท้ายสุดของ List
                 "item6": words[-2], #เพิ่มส่วนลด บาท, -2 หมายถึงสมาชิกตัวที่ 2 จากด้านท้ายสุดของ List
