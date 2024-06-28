@@ -89,4 +89,6 @@ async def extract_makro_receipt_information(file: UploadFile):
         elif re.compile(r'ชำระโดย').search(text[index]):
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
 
+    json = {"result": result} #สร้างข้อมูล json สำหรับส่งไปเขียนไฟล์ csv
+
     return {"result": result}

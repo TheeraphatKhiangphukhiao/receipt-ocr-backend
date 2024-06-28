@@ -70,25 +70,25 @@ async def extract_bigc_receipt_information(file: UploadFile):
     })
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List 
-        number = 0
-        over = ""
+        number = 0 #ประกาศตัวเเปรสำหรับเก็บจำนวนของบรรทัดที่จะบวกไปหาข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆ
+        over = "" #สำหรับเก็บข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆออกมา
         product_name = "" #ประกาศตัวเเปรสำหรับสร้างรายการสินค้าที่มีการ join ข้อมูลใน List
 
-        if re.compile(r'^\d+.\d+\s+\d{13}').search(text[index]):
+        if re.compile(r'^\d+.\d+\s+\d{13}').search(text[index]): #หาเเถวที่ต้องการ
             words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
-            #print(words)
+            print(words)
             
-            count = 1
-            while True:
-                if text[index+count] == "":
-                    count += 1
+            count = 1 #สำหรับนับจำนวนของบรรทัดที่จะบวกไปหาข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆ
+            while True: 
+                if text[index+count] == "": #ตรวจสอบว่าบรรทัดต่อๆไปของเเถวนั้นๆมีค่าว่างหรือไม่
+                    count += 1 #ถ้ามีค่าว่างที่ให้ count บวกไปทีละ 1 เเล้ววนลูปไปเรื่อยๆจนกว่าจะเจอเเถวที่มีข้อมูล
                 else:
-                    number += count
+                    number += count #ถ้าเจอเเถวมีข้อมูลก็ให้เก็บจำนวนของบรรทัดที่จะบวกไปหาข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆ เเละหยุดการทำงานของลูป
                     break
 
-            if (not re.compile(r'^\d+.\d+\s+\d{13}').search(text[index+number])) and (not re.compile(r'ออกแทนใบกํากับภาษีอย่างย่อ').search(text[index+number])):
+            if (not re.compile(r'^\d+.\d+\s+\d{13}').search(text[index+number])) and (not re.compile(r'ออกแทนใบกํากับภาษีอย่างย่อ\s+เลขที่\s+\d+').search(text[index+number])):
                 over = text[index+number] #นำข้อมูลที่เกินของรายการสินค้าในเเถวนั้นๆออกมา
-                product_name = " ".join(words[2:-3]) + over
+                product_name = " ".join(words[2:-3]) + over #นำข้อมูลที่เกินมาต่อเข้ากับรายการสินค้าของตัวมัน
 
             else: #กรณีที่ไม่มีข้อความเกินจนขึ้นบรรทัดใหม่
                 print("กรณีที่ไม่มีข้อความเกินจนขึ้นบรรทัดใหม่")
@@ -105,7 +105,9 @@ async def extract_bigc_receipt_information(file: UploadFile):
                 "item8": words[-1] #เพิ่มจำนวนเงิน (รวม VAT), -1 หมายถึงสมาชิกตัวเเรกจากด้านท้ายสุดของ List
             })
             
-        elif re.compile(r'ออกแทนใบกํากับภาษีอย่างย่อ').search(text[index]):
+        elif re.compile(r'ออกแทนใบกํากับภาษีอย่างย่อ\s+เลขที่\s+\d+').search(text[index]):
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
+
+    json = {"result": result} #สร้างข้อมูล json สำหรับส่งไปเขียนไฟล์ csv
 
     return {"result": result}

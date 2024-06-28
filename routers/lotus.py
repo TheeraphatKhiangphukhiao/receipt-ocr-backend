@@ -34,27 +34,27 @@ async def extract_lotus_receipt_information(file: UploadFile):
     imRGB = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
     imGray = await convert_to_grayscale(imRGB) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพระดับเทา
     
-    #เเปลงภาพระดับเทาให้เป็นภาพเเบบ binary
-    #THRESH_BINARY_INV : เเปลงพิกเซลที่มีค่าน้อยกว่า threshold ให้เป็นสีขาว 255 และพิกเซลที่มีค่ามากกว่า threshold ให้เป็นสีดำ 0
-    #THRESH_OTSU : คำนวณหา threshold โดยวิธี Otsu
-    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1] #คำตอบที่ได้จะเป็น tuple ที่ประกอบด้วยค่า threshold และภาพที่ผ่านการ threshold ซึ่งเราสนใจแค่ภาพเลยใช้ [1] เพื่อเลือกเฉพาะภาพนั้นมาใช้งาน
-    print(thresh)
+    # #เเปลงภาพระดับเทาให้เป็นภาพเเบบ binary
+    # #THRESH_BINARY_INV : เเปลงพิกเซลที่มีค่าน้อยกว่า threshold ให้เป็นสีขาว 255 และพิกเซลที่มีค่ามากกว่า threshold ให้เป็นสีดำ 0
+    # #THRESH_OTSU : คำนวณหา threshold โดยวิธี Otsu
+    # thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)[1] #คำตอบที่ได้จะเป็น tuple ที่ประกอบด้วยค่า threshold และภาพที่ผ่านการ threshold ซึ่งเราสนใจแค่ภาพเลยใช้ [1] เพื่อเลือกเฉพาะภาพนั้นมาใช้งาน
+    # print(thresh)
     
-    noise_reduced = cv.medianBlur(thresh, 3) #ทำการลด noise โดยใช้ฟิลเตอร์แบบ median blur กับภาพเเละใช้ kernel 3x3
+    # noise_reduced = cv.medianBlur(thresh, 3) #ทำการลด noise โดยใช้ฟิลเตอร์แบบ median blur กับภาพเเละใช้ kernel 3x3
 
-    #เพิ่มความคมชัด
-    sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
+    # #เพิ่มความคมชัด
+    # sharpened = cv.addWeighted(noise_reduced, 1.5, noise_reduced, -0.5, 0)
 
-    #ทำการเพิ่มขนาดของรูปภาพให้ใหญ่ขึ้น 1.5 เท่าในเเกน x เเละ 1.5 เท่าในเเกน y
-    #interpolation=cv.INTER_LINEAR : ใช้การ interpolation แบบ linear เพื่อเพิ่มความละเอียดของภาพ
-    resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
+    # #ทำการเพิ่มขนาดของรูปภาพให้ใหญ่ขึ้น 1.5 เท่าในเเกน x เเละ 1.5 เท่าในเเกน y
+    # #interpolation=cv.INTER_LINEAR : ใช้การ interpolation แบบ linear เพื่อเพิ่มความละเอียดของภาพ
+    # resized = cv.resize(sharpened, None, fx=1.5, fy=1.5, interpolation=cv.INTER_LINEAR)
     
-    # cv.namedWindow('resized', cv.WINDOW_NORMAL)
-    # cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
-    # cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
-    # cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
+    # # cv.namedWindow('resized', cv.WINDOW_NORMAL)
+    # # cv.imshow('resized', resized) # คำสั่งเเสดงผลภาพ
+    # # cv.waitKey(0) # คำสั่งรอคอยการกด Keyboard
+    # # cv.destroyAllWindows() # เป็นการล้างหน้าต่างทั้งหมดที่เปิดเเสดงผลภาพ 
     
-    text = pytesseract.image_to_string(resized, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    text = pytesseract.image_to_string(imGray, lang='Tha+Eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
     
     #กำหนด pattern สำหรับเก็บข้อมูล
@@ -88,5 +88,7 @@ async def extract_lotus_receipt_information(file: UploadFile):
             
         elif re.compile(r'ยอดรวมทั้งหมดในหน้าเเรก').search(text[index]):
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
+
+    json = {"result": result} #สร้างข้อมูล json สำหรับส่งไปเขียนไฟล์ csv
 
     return {"result": result}
