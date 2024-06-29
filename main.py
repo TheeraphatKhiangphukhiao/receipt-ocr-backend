@@ -7,6 +7,9 @@ from routers.index import router as index_router #นำเข้าเส้น
 from routers.upload import router as upload_router #นำเข้าเส้นทางจากไฟล์ routers.upload
 from fastapi.middleware.cors import CORSMiddleware #เพื่อจัดการกับ Cross-Origin Resource Sharing (CORS) เป็นเทคโนโลยีที่อนุญาตให้เว็บแอปพลิเคชันทำงานร่วมกับแหล่งที่มาจากโดเมนอื่นๆ
 
+import os
+import subprocess
+
 app = FastAPI() #สร้าง instance ของ FastAPI application
 
 app.add_middleware(
@@ -26,4 +29,4 @@ app.include_router(upload_router, prefix="/upload") #เส้นทางทั
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def read_root():
-    return {"Hello": "The server is up and running."}
+    return {"Hello": subprocess.getoutput('which tesseract')}
