@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.11-slim-buster
 WORKDIR /app
 
 RUN apt-get update && \
@@ -6,6 +6,7 @@ RUN apt-get update && \
     apt-get -qq -y install libtesseract-dev
 
 COPY . /app
+COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 8000
