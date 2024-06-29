@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster
+FROM python:3.11
 WORKDIR /app
 
 RUN apt-get update && \
@@ -7,7 +7,7 @@ RUN apt-get update && \
 
 COPY . /app
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 EXPOSE 8000
 ENV NAME World
