@@ -3,6 +3,7 @@ import cv2 as cv #สำหรับประมวลผลภาพล่ว�
 import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
+from . import makro as m #ทำการ import ไฟล์ makro.py เข้ามา
 
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
@@ -17,29 +18,49 @@ async def create_upload_file(file):
     return imGray #ส่งรูปภาพกลับไป
 
 
+#thresholding
+async def thresholding(imGray):
+    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+    return thresh
+
+
 @router.get("/", status_code=status.HTTP_200_OK)
 async def read_index():
     return {"message": "This is the index endpoint"}
 
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
-@router.post("/receipt/identify", status_code=status.HTTP_200_OK)
-async def identify_receipt_type(file: UploadFile):
+@router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
+async def extract_receipt_information(file: UploadFile):
+
     receipt_type_name: str = "" #ตัวเเปรสำหรับเก็บชื่อประเภทของใบเสร็จ
-    
     imGray = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
-    blur = cv.GaussianBlur(imGray, (5, 5), 0)
-    text = pytesseract.image_to_string(blur, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+
+    thresh = await thresholding(imGray)
+    resized = cv.resize(thresh, None, fx=0.5, fy=0.5, interpolation=cv.INTER_LINEAR)
+
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+    text = pytesseract.image_to_string(resized, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     
+
     #re.compile ใช้ในการสร้างวัตถุ regular expression
     makro_pattern = re.compile(r'\bmakro\b') #\bmakro\b จะค้นหาคำว่า makro ในตัวเเปร text โดยคำนี้จะต้องมีขอบเขตของคำ word boundary ที่ขึ้นต้นเเละลงท้ายโดยใช้ \b
     bigc_pattern = re.compile(r'บิ๊กซี') #สร้าง pattern ที่จะค้นหาคำว่า บิ๊กซี ในตัวเเปร text
+    lotus_pattern = re.compile(r'เอก-ชัย ดีสทริบิวชั่น ซิสเทม') #สร้าง pattern ที่จะค้นหาคำว่า เอก-ชัย ดีสทริบิวชั่น ซิสเทม ในตัวเเปร text
+
 
     if makro_pattern.search(text): #เป็นการตรวจสอบว่าในตัวเเปร text มีคำว่า makro หรือไม่
         receipt_type_name = "makro" #ถ้าพบก็กำหนดให้เป็น makro
+        await m.extract_makro_receipt_information(text)
+
     elif bigc_pattern.search(text):
         receipt_type_name = "bigc"
+
+    elif lotus_pattern.search(text):
+        receipt_type_name = "lotus" 
+
     else:
-        receipt_type_name = "lotus" #เนื่องจากใบเสร็จ lotus ไม่มี keyword ที่บ่งบอกว่าเป็นใบเสร็จประเภทใด เเต่ในโครงการนี้มีใบเสร็จเเค่ 3 ประเภท เเละอีกสองประเภทมี keyword ที่บ่งบอกว่าเป็นใบเสร็จประเภทใด ดังนั้นเมื่อไม่เข้าเงื่อนไขใดเลยจึงกลายเป็นประเภท lotus เเน่นอน
+        receipt_type_name = "not found" 
+
 
     return {"receipt_type_name": receipt_type_name} #ส่งประเภทของใบเสร็จรับเงินไปให้ front end
