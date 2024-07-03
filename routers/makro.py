@@ -6,6 +6,12 @@ async def extract_makro_receipt_information(text):
     result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
 
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
+
+    #กำหนดชื่อบริษัท
+    result.append({
+        "item1": "บริษัท ซีพี เเอ็กซ์ตร้า จำกัด (มหาชน)"
+    })
+    
     
     #กำหนด pattern สำหรับเก็บข้อมูล
     result.append({
@@ -20,11 +26,11 @@ async def extract_makro_receipt_information(text):
     })
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
+        print(text[index])
 
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
 
             words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
-            print(words)
 
             
             result.append({
