@@ -12,7 +12,7 @@ async def extract_makro_receipt_information(text):
         "item1": "บริษัท ซีพี เเอ็กซ์ตร้า จำกัด (มหาชน)"
     })
     
-    
+
     #กำหนด pattern สำหรับเก็บข้อมูล
     result.append({
         "item1": "จำนวน",
@@ -26,7 +26,7 @@ async def extract_makro_receipt_information(text):
     })
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
-        print(text[index])
+        #print(text[index])
 
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
 
@@ -48,5 +48,27 @@ async def extract_makro_receipt_information(text):
             print("หยุดการทำงานของ makro")
 
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
+
+
+    index = (len(text) - 1)
+    while index >= 0:
+
+        if re.compile(r'^[ก-ฮ]+[^\d]*\s+\d+.\d+').search(text[index]):
+            words = text[index].split()
+
+            result.append({
+                "item1": "ยอดเงินชำระ",
+                "item2": "",
+                "item3": "",
+                "item4": "",
+                "item5": "",
+                "item6": "",
+                "item7": "",
+                "item8": words[-1]
+            })
+
+            print("stop")
+            break
+        index -= 1
 
     return result
