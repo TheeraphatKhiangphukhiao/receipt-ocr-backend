@@ -3,7 +3,7 @@ import cv2 as cv #สำหรับประมวลผลภาพล่ว�
 import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
-from . import makro as m #ทำการ import ไฟล์ makro.py เข้ามา
+from . import makro #ทำการ import ไฟล์ makro.py เข้ามา, . หมายถึงโฟลเดอร์เดียวกันกับไฟล์ที่กำลังเขียนอยู่
 
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
@@ -50,8 +50,7 @@ async def extract_receipt_information(file: UploadFile):
 
 
     if makro_pattern.search(text): #เป็นการตรวจสอบว่าในตัวเเปร text มีคำว่า makro หรือไม่
-        receipt_type_name = "makro" #ถ้าพบก็กำหนดให้เป็น makro
-        await m.extract_makro_receipt_information(text)
+        result = await makro.extract_makro_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ makro ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
 
     elif bigc_pattern.search(text):
         receipt_type_name = "bigc"
@@ -63,4 +62,4 @@ async def extract_receipt_information(file: UploadFile):
         receipt_type_name = "not found" 
 
 
-    return {"receipt_type_name": receipt_type_name} #ส่งประเภทของใบเสร็จรับเงินไปให้ front end
+    return {"result": result} #ส่งข้อมูลส่วนสำคัญกลับไปในรูปเเบบ json
