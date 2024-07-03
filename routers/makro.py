@@ -4,6 +4,7 @@ import re
 async def extract_makro_receipt_information(text):
 
     result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
+    payment_amount: int = 0
 
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
 
@@ -26,11 +27,11 @@ async def extract_makro_receipt_information(text):
     })
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
-        #print(text[index])
 
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
 
             words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
+            print(words)
 
             
             result.append({
@@ -43,6 +44,8 @@ async def extract_makro_receipt_information(text):
                 "item7": words[-2], #เพิ่มข้อมูล VAT CODE, -2 หมายถึงสมาชิกตัวที่สองจากด้านท้ายสุดของ List
                 "item8": words[-1] #เพิ่มจำนวนเงิน (รวม VAT), -1 หมายถึงสมาชิกตัวเเรกจากด้านท้ายสุดของ List
             })
+
+            payment_amount += float(words[-1])
             
         elif re.compile(r'ชำระโดย').search(text[index]):
             print("หยุดการทำงานของ makro")
@@ -50,25 +53,15 @@ async def extract_makro_receipt_information(text):
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
 
 
-    index = (len(text) - 1)
-    while index >= 0:
-
-        if re.compile(r'^[ก-ฮ]+[^\d]*\s+\d+.\d+').search(text[index]):
-            words = text[index].split()
-
-            result.append({
-                "item1": "ยอดเงินชำระ",
-                "item2": "",
-                "item3": "",
-                "item4": "",
-                "item5": "",
-                "item6": "",
-                "item7": "",
-                "item8": words[-1]
-            })
-
-            print("stop")
-            break
-        index -= 1
+    result.append({
+        "item1": "ยอดเงินชำระ",
+        "item2": "",
+        "item3": "",
+        "item4": "",
+        "item5": "",
+        "item6": "",
+        "item7": "",
+        "item8": "{:.2f}".format(payment_amount)
+    })
 
     return result
