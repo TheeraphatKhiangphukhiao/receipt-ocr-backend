@@ -4,6 +4,7 @@ import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
 from . import makro #ทำการ import ไฟล์ makro.py เข้ามา, . หมายถึงโฟลเดอร์เดียวกันกับไฟล์ที่กำลังเขียนอยู่
+from . import lotus 
 
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
@@ -56,7 +57,7 @@ async def extract_receipt_information(file: UploadFile):
         receipt_type_name = "bigc"
 
     elif lotus_pattern.search(text):
-        receipt_type_name = "lotus" 
+        result = await lotus.extract_lotus_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ lotus ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
 
     else:
         receipt_type_name = "not found" 

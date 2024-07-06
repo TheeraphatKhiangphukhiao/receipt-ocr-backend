@@ -28,7 +28,9 @@ async def extract_makro_receipt_information(text):
     
     for index in range(len(text)): #วนลูปตามความยาวของตัวเเปร text ที่มีชนิดเป็น List
 
+
         if re.compile(r'^\d+\s+\d{13}').search(text[index]):
+
 
             words = text[index].split() #เเบ่งข้อความตามการเว้นวรรค
             print(words)
@@ -47,8 +49,8 @@ async def extract_makro_receipt_information(text):
 
             payment_amount += float(words[-1]) #ทำการหาผลรวมสำหรับ ยอดเงินชำระ
             
-        elif re.compile(r'ชำระโดย').search(text[index]):
-            print("หยุดการทำงานของ makro")
+        elif re.compile(r'^[A-Z]+\s+:\s+\d+').search(text[index]):
+            print("หยุดการทำงานของ makro " + text[index])
 
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
 
