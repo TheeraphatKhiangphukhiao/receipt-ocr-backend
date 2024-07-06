@@ -4,7 +4,7 @@ import re
 async def extract_makro_receipt_information(text):
 
     result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
-    payment_amount: int = 0
+    payment_amount: int = 0 #ประกาศตัวเเปรสำหรับเก็บ ยอดเงินชำระ
 
     text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
 
@@ -45,14 +45,15 @@ async def extract_makro_receipt_information(text):
                 "item8": words[-1] #เพิ่มจำนวนเงิน (รวม VAT), -1 หมายถึงสมาชิกตัวเเรกจากด้านท้ายสุดของ List
             })
 
-            payment_amount += float(words[-1])
+            payment_amount += float(words[-1]) #ทำการหาผลรวมสำหรับ ยอดเงินชำระ
             
         elif re.compile(r'ชำระโดย').search(text[index]):
             print("หยุดการทำงานของ makro")
 
             break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
 
-
+    
+    #เพิ่มข้อมูล ยอดเงินชำระ
     result.append({
         "item1": "ยอดเงินชำระ",
         "item2": "",
