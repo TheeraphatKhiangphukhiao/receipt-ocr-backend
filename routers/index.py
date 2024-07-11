@@ -5,6 +5,7 @@ import re
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
 from . import makro #ทำการ import ไฟล์ makro.py เข้ามา, . หมายถึงโฟลเดอร์เดียวกันกับไฟล์ที่กำลังเขียนอยู่
 from . import lotus 
+from . import bigc
 
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
@@ -34,14 +35,14 @@ async def read_index():
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_receipt_information(file: UploadFile):
 
-    receipt_type_name: str = "" #ตัวเเปรสำหรับเก็บชื่อประเภทของใบเสร็จ
+    receipt_type_name: str = "" #ตัวเเปรสำหรับเก็บชื่อประเภทของใบเสร็จ 
     imGray = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
 
     thresh = await thresholding(imGray)
     resized = cv.resize(thresh, None, fx=0.5, fy=0.5, interpolation=cv.INTER_LINEAR)
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
-    text = pytesseract.image_to_string(resized, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    text = pytesseract.image_to_string(thresh, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     
 
     #re.compile ใช้ในการสร้างวัตถุ regular expression
@@ -54,13 +55,13 @@ async def extract_receipt_information(file: UploadFile):
         result = await makro.extract_makro_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ makro ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
 
     elif bigc_pattern.search(text):
-        receipt_type_name = "bigc"
+        result = await bigc.extract_bigc_receipt_information(text)
 
     elif lotus_pattern.search(text):
         result = await lotus.extract_lotus_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ lotus ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
 
     else:
-        receipt_type_name = "not found" 
+        result = "not found" 
 
 
     return {"result": result} #ส่งข้อมูลส่วนสำคัญกลับไปในรูปเเบบ json
