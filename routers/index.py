@@ -16,14 +16,20 @@ async def create_upload_file(file):
     content = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์ที่ได้รับมาเป็น byte string โดยใช้การอ่านแบบ asynchronous
     nparr = np.frombuffer(content, np.uint8) #เเปลงข้อมูล byte string ในตัวเเปร content เป็น array ของตัวเลข 8-bit unsigned integers
     imRGB = cv.imdecode(nparr, cv.IMREAD_COLOR) #เพื่อเเปลง array ของตัวเลขที่เก็บใน nparr ให้เป็นภาพสี RGB
-    imGray = cv.cvtColor(imRGB, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
-    return imGray #ส่งรูปภาพกลับไป
+
+    return imRGB #ส่งรูปภาพกลับไป
 
 
 #thresholding
 async def thresholding(imGray):
-    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1] #เเปลงรูปภาพเป็นเเบบ 2 ระดับในที่นี้คือ 0 กับ 255 โดยใช้วิธีการเเปลงเเบบ Otsu
     return thresh
+
+
+#Grayscale image
+async def convert_to_grayscale(imRGB):
+    imGray = cv.cvtColor(imRGB, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
+    return imGray
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -35,11 +41,14 @@ async def read_index():
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_receipt_information(file: UploadFile):
 
-    receipt_type_name: str = "" #ตัวเเปรสำหรับเก็บชื่อประเภทของใบเสร็จ 
-    imGray = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
+    imRGB = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
+
+    imGray = await convert_to_grayscale(imRGB) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพ grayscale
 
     thresh = await thresholding(imGray)
+
     resized = cv.resize(thresh, None, fx=0.5, fy=0.5, interpolation=cv.INTER_LINEAR)
+
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
     text = pytesseract.image_to_string(thresh, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
