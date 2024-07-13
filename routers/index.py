@@ -47,8 +47,6 @@ async def extract_receipt_information(file: UploadFile):
 
     thresh = await thresholding(imGray)
 
-    resized = cv.resize(thresh, None, fx=0.5, fy=0.5, interpolation=cv.INTER_LINEAR)
-
 
     pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
     text = pytesseract.image_to_string(thresh, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
