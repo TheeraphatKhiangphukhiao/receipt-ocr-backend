@@ -16,7 +16,7 @@ router = APIRouter() #สร้าง instance ของ APIRouter เพื่�
 #ฟังก์ชันเพื่ออ่านไฟล์รูปภาพที่อัปโหลด โดยใช้ OpenCV เพื่อแปลงภาพเป็น grayscale
 async def create_upload_file(file):
     content = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์ที่ได้รับมาเป็น byte string โดยใช้การอ่านแบบ asynchronous
-    image = Image.open(BytesIO(content))
+    image = Image.open(BytesIO(content)) #เเปลง byte string ไปเป็นรูปภาพ
     image = np.array(image)
 
     return image
