@@ -5,7 +5,6 @@ WORKDIR /code
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-tha \
-    tesseract-ocr-eng \
     libgl1-mesa-glx \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

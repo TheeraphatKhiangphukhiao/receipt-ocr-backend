@@ -50,7 +50,6 @@ async def extract_receipt_information(file: UploadFile):
     blur = cv.GaussianBlur(imGray, (5, 5), 0)
 
 
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
     text = pytesseract.image_to_string(blur, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
     
 
