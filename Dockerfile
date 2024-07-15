@@ -19,4 +19,4 @@ COPY ./routers /code/routers
 COPY ./uploads /code/uploads
 
 ENV PYTHONPATH "${PYTHONPATH}:/code"
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["fastapi", "run", "main.py", "--port", "80"]
