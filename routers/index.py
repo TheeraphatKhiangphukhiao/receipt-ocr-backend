@@ -3,73 +3,133 @@ import cv2 as cv #สำหรับประมวลผลภาพล่ว�
 import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
+from pytesseract import Output
+import io
 from . import makro #ทำการ import ไฟล์ makro.py เข้ามา, . หมายถึงโฟลเดอร์เดียวกันกับไฟล์ที่กำลังเขียนอยู่
 from . import lotus 
 from . import bigc
-from PIL import Image
-from io import BytesIO
+from PIL import Image, ImageFilter
 
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 
 
-#ฟังก์ชันเพื่ออ่านไฟล์รูปภาพที่อัปโหลด โดยใช้ OpenCV เพื่อแปลงภาพเป็น grayscale
-async def create_upload_file(file):
-    content = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์ที่ได้รับมาเป็น byte string โดยใช้การอ่านแบบ asynchronous
-    image = Image.open(BytesIO(content)) #เเปลง byte string ไปเป็นรูปภาพ
-    image = np.array(image)
-
-    return image
-    
-
-#thresholding
-async def thresholding(imGray):
-    thresh = cv.threshold(imGray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1] #เเปลงรูปภาพเป็นเเบบ 2 ระดับในที่นี้คือ 0 กับ 255 โดยใช้วิธีการเเปลงเเบบ Otsu
-    return thresh
-
-
-#Grayscale image
-async def convert_to_grayscale(image):
-    imGray = cv.cvtColor(image, cv.COLOR_BGR2GRAY) #แปลงภาพจากรูปแบบสี RGB เป็นภาพสีเทา grayscale
-    return imGray
-
-
-@router.get("/", status_code=status.HTTP_200_OK)
-async def read_index():
-    return {"message": "This is the index endpoint"}
+pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
 
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_receipt_information(file: UploadFile):
 
-    image = await create_upload_file(file) #ส่งไฟล์ไปยังฟังก์ชั่น
+    image_path = r'uploads\image_processing.jpg'
 
-    imGray = await convert_to_grayscale(image) #ส่งรูปภาพ RGB ไปยังฟังก์ชั่นเพื่อเเปลงเป็นภาพ grayscale
-
-    blur = cv.GaussianBlur(imGray, (5, 5), 0)
-
-
-    text = pytesseract.image_to_string(blur, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    makro_pattern = r'บริษัท ซีพี แอ็กซ์ตร้า'
+    bigc_pattern = r'บิ๊กซี'
+    lotus_pattern = r'บริษัท เอก-ชัย'
     
 
-    #re.compile ใช้ในการสร้างวัตถุ regular expression
-    makro_pattern = re.compile(r'\bmakro\b') #\bmakro\b จะค้นหาคำว่า makro ในตัวเเปร text โดยคำนี้จะต้องมีขอบเขตของคำ word boundary ที่ขึ้นต้นเเละลงท้ายโดยใช้ \b
-    bigc_pattern = re.compile(r'บิ๊กซี') #สร้าง pattern ที่จะค้นหาคำว่า บิ๊กซี ในตัวเเปร text
-    lotus_pattern = re.compile(r'เอก-ชัย ดีสทริบิวชั่น ซิสเทม') #สร้าง pattern ที่จะค้นหาคำว่า เอก-ชัย ดีสทริบิวชั่น ซิสเทม ในตัวเเปร text
+    contents = await file.read()
+
+    imRGB = Image.open(io.BytesIO(contents))
+    print(imRGB.mode)
+    
+
+    imGray = imRGB.convert('L')
+    print(imGray.mode)
+
+    r_img = imGray.resize((1191, 2000), Image.LANCZOS)
+
+    f_img = r_img.filter(ImageFilter.UnsharpMask(radius=6.8, percent=150, threshold=0))
+
+    f_img.save(image_path, quality=100)
+
+    image = Image.open(image_path)
+    width, height = image.size
+
+    conv_img = np.array(image)
 
 
-    if makro_pattern.search(text): #เป็นการตรวจสอบว่าในตัวเเปร text มีคำว่า makro หรือไม่
-        result = await makro.extract_makro_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ makro ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
+    text = pytesseract.image_to_string(conv_img, lang='tha') #เเปลงรูปภาพใบเสร็จไปเป็น text
+    print(text)
 
-    elif bigc_pattern.search(text):
-        result = await bigc.extract_bigc_receipt_information(text)
+    if re.search(makro_pattern, text):
+        print('Hello makro !!')
 
-    elif lotus_pattern.search(text):
-        result = await lotus.extract_lotus_receipt_information(text) #เเสดงว่ารูปภาพนี้คือ lotus ทำการส่งข้อมูลไปสกัดข้อมูลส่วนสำคัญออกมา
+        upper_part = re.compile(r'WEIGHT')
+        lower_part = re.compile(r'KBANK')
+
+        left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
+
+        image = image.crop((left, top, right, bottom))
+        image.show()
+
+    elif re.search(bigc_pattern, text):
+        print('Hello big c !!')
+
+        upper_part = re.compile(r'POS')
+        lower_part = re.compile(r'Payment')
+
+        left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
+
+        image = image.crop((left, top, right, bottom))
+        image.show()
+
+    elif re.search(lotus_pattern, text):
+        print('Hello lotus !!')
+
+        lotus_text = pytesseract.image_to_string(conv_img, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+
+        result = await lotus.extract_lotus_receipt_information(lotus_text)
 
     else:
-        result = "not found" 
+        print('not found')
+
+    return {
+        "result": result
+    }
 
 
-    return {"result": result} #ส่งข้อมูลส่วนสำคัญกลับไปในรูปเเบบ json
+
+#ฟังก์ชั่นหาพื้นที่สำหรับ ตัดรูปภาพเอาเฉพาะส่วนสำคัญ
+def image_crop_area(conv_img, upper_part, lower_part, width):
+
+    x1, y1, w1, h1 = 0, 0, 0, 0
+    x2, y2, w2, h2 = 0, 0, 0, 0
+
+    d = pytesseract.image_to_data(conv_img, lang='eng', output_type=Output.DICT)
+    print(d.keys())
+    print(d['text'])
+
+    n_boxes = len(d['text'])
+
+    for index in range(n_boxes):
+
+        if upper_part.search(d['text'][index]):
+
+            print('Hello Upper !!')
+            print(d['text'][index])
+
+            (x1, y1) = (d['left'][index], d['top'][index])
+            (w1, h1) = (d['width'][index], d['height'][index])
+
+            break
+
+    for index in range(n_boxes):
+
+        if lower_part.search(d['text'][index]):
+
+            print('Hello Lower !!')
+            print(d['text'][index])
+
+            (x2, y2) = (d['left'][index], d['top'][index])
+            (w2, h2) = (d['width'][index], d['height'][index])
+
+            break
+
+    left = 0
+    top = y1+h1
+    right = width
+    bottom = ((y2+h2)+5)
+
+    return left, top, right, bottom
+    

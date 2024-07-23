@@ -34,7 +34,7 @@ async def save_receipt(receipt_data: Request):
         rows.append(row) #ทำการเพิ่มข้อมูลทีละเเถวเข้าไปที่ rows, คำตอบจะได้เป็น List ซ้อน List
 
 
-    filename = r"uploads\Receipt.csv" #ที่อยู่สำหรับเก็บไฟล์ 
+    filename = r"csvfile\receipt.csv" #ที่อยู่สำหรับเก็บไฟล์ 
 
     with open(filename, 'w', newline='', encoding='utf-8') as csvfile: #w หมายถึงโหมดเขียน, newline='' หมายถึงไม่ให้เพิ่มบรรทัดว่างโดยอัตโนมัติเมื่อเขียนลงไฟล์
         csvwriter = csv.writer(csvfile) #สร้างอ็อบเจกต์สำหรับเขียนข้อมูลลงในไฟล์ csv
