@@ -6,7 +6,7 @@ async def extract_lotus_receipt_information(text):
     result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
     payment_amount: int = 0 #ประกาศตัวเเปรสำหรับเก็บ ยอดเงินชำระ
 
-    text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
+    text = text.split('\n') #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
 
     #กำหนดชื่อบริษัท
     result.append({
@@ -20,7 +20,7 @@ async def extract_lotus_receipt_information(text):
         "item2": "รหัสสินค้า",
         "item3": "รายการสินค้า",
         "item4": "หน่วยบรรจุ",
-        "item5": "ราคาต่อหน่วย (รวม VAT)",
+        "item5": "ราคาต่อหน่วย",
         "item6": "ส่วนลด บาท",
         "item7": "VAT CODE",
         "item8": "จำนวนเงิน (รวม VAT)"

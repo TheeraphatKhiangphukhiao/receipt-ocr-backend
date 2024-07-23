@@ -20,7 +20,7 @@ async def extract_makro_receipt_information(text):
         "item2": "รหัสสินค้า",
         "item3": "รายการสินค้า",
         "item4": "หน่วยบรรจุ",
-        "item5": "ราคาต่อหน่วย (รวม VAT)",
+        "item5": "ราคาต่อหน่วย",
         "item6": "ส่วนลด บาท",
         "item7": "VAT CODE",
         "item8": "จำนวนเงิน (รวม VAT)"

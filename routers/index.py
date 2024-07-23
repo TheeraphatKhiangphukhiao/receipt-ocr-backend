@@ -21,6 +21,8 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Te
 @router.post("/receipt/ocr", status_code=status.HTTP_200_OK)
 async def extract_receipt_information(file: UploadFile):
 
+    result = []
+
     image_path = r'uploads\image_processing.jpg'
 
     makro_pattern = r'บริษัท ซีพี แอ็กซ์ตร้า'
@@ -43,6 +45,7 @@ async def extract_receipt_information(file: UploadFile):
 
     f_img.save(image_path, quality=100)
 
+
     image = Image.open(image_path)
     width, height = image.size
 
@@ -62,6 +65,11 @@ async def extract_receipt_information(file: UploadFile):
 
         image = image.crop((left, top, right, bottom))
         image.show()
+        image = np.array(image)
+
+
+        makro_text = pytesseract.image_to_string(image, lang='tha+eng', config='--psm 6') #เเปลงรูปภาพใบเสร็จไปเป็น text
+        print(makro_text)
 
     elif re.search(bigc_pattern, text):
         print('Hello big c !!')
@@ -73,16 +81,23 @@ async def extract_receipt_information(file: UploadFile):
 
         image = image.crop((left, top, right, bottom))
         image.show()
+        image = np.array(image)
+
+
+        bigc_text = pytesseract.image_to_string(image, lang='tha+eng', config='--psm 6') #เเปลงรูปภาพใบเสร็จไปเป็น text
+        print(bigc_text)
 
     elif re.search(lotus_pattern, text):
         print('Hello lotus !!')
 
-        lotus_text = pytesseract.image_to_string(conv_img, lang='tha+eng') #เเปลงรูปภาพใบเสร็จไปเป็น text
+        lotus_text = pytesseract.image_to_string(conv_img, lang='tha+eng', config='--psm 6') #เเปลงรูปภาพใบเสร็จไปเป็น text
 
         result = await lotus.extract_lotus_receipt_information(lotus_text)
 
     else:
-        print('not found')
+        print('รูปภาพไม่ถูกต้อง ต้องเป็น makro bigc lotus เท่านั้น')
+        result = []
+
 
     return {
         "result": result

@@ -1,7 +1,7 @@
 from typing import Union
 from fastapi import FastAPI, status
 from routers.index import router as index_router #นำเข้าเส้นทางจากไฟล์ routers.index
-from routers.upload import router as upload_router #นำเข้าเส้นทางจากไฟล์ routers.upload
+from routers.csvfile import router as csvfile_router #นำเข้าเส้นทางจากไฟล์ routers.upload
 from fastapi.middleware.cors import CORSMiddleware #เพื่อจัดการกับ Cross-Origin Resource Sharing (CORS) เป็นเทคโนโลยีที่อนุญาตให้เว็บแอปพลิเคชันทำงานร่วมกับแหล่งที่มาจากโดเมนอื่นๆ
 
 
@@ -19,7 +19,7 @@ app.add_middleware(
 
 #กำหนดเส้นทาง routers
 app.include_router(index_router, prefix="/index") #เส้นทางทั้งหมดใน index_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/index"
-app.include_router(upload_router, prefix="/upload") #เส้นทางทั้งหมดใน upload_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/upload"
+app.include_router(csvfile_router, prefix="/csvfile") #เส้นทางทั้งหมดใน csvfile_router จะถูกเรียกผ่าน URL ที่ขึ้นต้นด้วย "/csvfile"
 
 
 @app.get("/", status_code=status.HTTP_200_OK)
