@@ -14,8 +14,8 @@ RUN mkdir src && cd /app/src && \
     wget https://github.com/tesseract-ocr/tesseract/archive/refs/tags/5.4.1.zip && \
     unzip 5.4.1.zip && \
     cd /app/src/tesseract-5.4.1 && ./autogen.sh && ./configure && make && make install && ldconfig && \
-    cd /usr/local/share/tessdata && wget https://github.com/tesseract-ocr/tessdata/blob/main/eng.traineddata && \
-    cd /usr/local/share/tessdata && wget https://github.com/tesseract-ocr/tessdata/blob/main/tha.traineddata
+    cd /usr/local/share/tessdata && wget https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata && \
+    cd /usr/local/share/tessdata && wget https://github.com/tesseract-ocr/tessdata_best/raw/main/tha.traineddata
 
 ENV TESSDATA_PREFIX=/usr/local/share/tessdata
 

@@ -13,7 +13,7 @@ from PIL import Image, ImageFilter
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 
 
-#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
@@ -63,7 +63,6 @@ async def extract_receipt_information(file: UploadFile):
         left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
 
         image = image.crop((left, top, right, bottom))
-        #image.show()
         image = np.array(image)
 
 
@@ -82,7 +81,6 @@ async def extract_receipt_information(file: UploadFile):
         left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
 
         image = image.crop((left, top, right, bottom))
-        #image.show()
         image = np.array(image)
 
 
@@ -151,4 +149,3 @@ def image_crop_area(conv_img, upper_part, lower_part, width):
     bottom = ((y2+h2)+5)
 
     return left, top, right, bottom
-    
