@@ -1,5 +1,4 @@
 from fastapi import APIRouter, status, UploadFile #เพื่อใช้ในการสร้างเส้นทางของ API
-import cv2 as cv #สำหรับประมวลผลภาพล่วงหน้า
 import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
@@ -14,7 +13,7 @@ from PIL import Image, ImageFilter
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\zzz\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
@@ -64,12 +63,15 @@ async def extract_receipt_information(file: UploadFile):
         left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
 
         image = image.crop((left, top, right, bottom))
-        image.show()
+        #image.show()
         image = np.array(image)
 
 
+        #โหมดการเเบ่งหน้า tesseract (psm) วิธีปรับปรุงความเเม่นยำของ OCR
         makro_text = pytesseract.image_to_string(image, lang='tha+eng', config='--psm 6') #เเปลงรูปภาพใบเสร็จไปเป็น text
         print(makro_text)
+
+        result = await makro.extract_makro_receipt_information(makro_text)
 
     elif re.search(bigc_pattern, text):
         print('Hello big c !!')
@@ -80,12 +82,14 @@ async def extract_receipt_information(file: UploadFile):
         left, top, right, bottom = image_crop_area(conv_img, upper_part, lower_part, width)
 
         image = image.crop((left, top, right, bottom))
-        image.show()
+        #image.show()
         image = np.array(image)
 
 
         bigc_text = pytesseract.image_to_string(image, lang='tha+eng', config='--psm 6') #เเปลงรูปภาพใบเสร็จไปเป็น text
         print(bigc_text)
+
+        result = await bigc.extract_bigc_receipt_information(bigc_text)
 
     elif re.search(lotus_pattern, text):
         print('Hello lotus !!')
