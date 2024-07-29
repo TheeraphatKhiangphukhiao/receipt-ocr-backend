@@ -48,6 +48,11 @@ async def extract_makro_receipt_information(text):
             })
 
             payment_amount += float(words[-1]) #ทำการหาผลรวมสำหรับ ยอดเงินชำระ
+
+        elif re.compile(r'^[a-zA-Z]+\s+:\s+\d+$').search(text[index]):
+            print("หยุดการทำงานของ makro " + text[index])
+
+            break #ถ้าวนลูปจนถึงเเถวที่ไม่ต้องการ ทำการหยุดลูป
             
     
     #เพิ่มข้อมูล ยอดเงินชำระ

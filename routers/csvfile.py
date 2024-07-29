@@ -44,5 +44,6 @@ async def save_receipt(receipt_data: Request):
         csvwriter.writerows(rows) #เขียนข้อมูลหลายๆเเถวลงในไฟล์ csv
     try:
         return FileResponse(path=filename, media_type='text/csv', filename=filename)
+    
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="File not found.")
