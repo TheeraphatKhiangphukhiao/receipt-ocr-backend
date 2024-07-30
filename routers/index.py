@@ -2,7 +2,6 @@ from fastapi import APIRouter, status, UploadFile #เพื่อใช้ใ�
 import numpy as np
 import re 
 import pytesseract #เพื่อเเปลงรูปภาพใบเสร็จรับเงินมาเป็น text
-import io
 from . import makro #ทำการ import ไฟล์ makro.py เข้ามา, . หมายถึงโฟลเดอร์เดียวกันกับไฟล์ที่กำลังเขียนอยู่
 from . import lotus 
 from . import bigc
@@ -23,7 +22,7 @@ async def extract_receipt_information(file: UploadFile):
     bigc_pattern = r'บิ๊กซี'
     lotus_pattern = r'บริษัท เอก-ชัย'
     
-    contents = await file.read()
+    contents = await file.read() #อ่านข้อมูลทั้งหมดจากไฟล์
 
     bin_img = preprocessing(contents)
 
@@ -59,7 +58,6 @@ def preprocessing(contents):
     r_imRGB = cv2.resize(imRGB, None, fx=2, fy=2)
 
     imGray = cv2.cvtColor(r_imRGB, cv2.COLOR_BGR2GRAY)
-
     bin_img = cv2.threshold(imGray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
     cv2.imwrite(image_path, bin_img)

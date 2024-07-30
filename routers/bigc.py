@@ -6,7 +6,7 @@ async def extract_bigc_receipt_information(text):
     result = [] #ประกาศตัวเเปรสำหรับเก็บข้อมูลของใบเสร็จตาม pattern ที่กำหนด
     payment_amount: int = 0 #ประกาศตัวเเปรสำหรับเก็บ ยอดเงินชำระ
 
-    text = text.splitlines() #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
+    text = text.split('\n') #เเบ่งบรรทัดตามการขึ้นบรรทัดใหม่ \n
 
     #กำหนดชื่อบริษัท
     result.append({
@@ -22,7 +22,7 @@ async def extract_bigc_receipt_information(text):
         "item4": "หน่วยบรรจุ",
         "item5": "ราคาต่อหน่วย",
         "item6": "ส่วนลด บาท",
-        "item7": "VAT CODE",
+        "item7": "รหัสภาษี",
         "item8": "จำนวนเงิน (รวม VAT)"
     })
     
