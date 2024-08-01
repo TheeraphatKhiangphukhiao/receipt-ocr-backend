@@ -9,7 +9,7 @@ import cv2
 
 router = APIRouter() #สร้าง instance ของ APIRouter เพื่อนำไปใช้ในการกำหนดเส้นทางของ API
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+#pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 
 #เส้นทางสำหรับ preprocess รูปภาพเเละเเปลงรูปภาพใบเสร็จมาเป็น text รวมถึงตรวจสอบว่าเป็นใบเสร็จประเภทใด
@@ -33,11 +33,17 @@ async def extract_receipt_information(file: UploadFile):
     if re.search(makro_pattern, text):
         print('Hello makro !!')
 
+        result = await makro.extract_makro_receipt_information(text)
+
     elif re.search(bigc_pattern, text):
         print('Hello big c !!')
 
+        result = await bigc.extract_bigc_receipt_information(text)
+
     elif re.search(lotus_pattern, text):
         print('Hello lotus !!')
+
+        result = await lotus.extract_lotus_receipt_information(text)
 
     else:
         print('รูปภาพไม่ถูกต้อง ต้องเป็น makro bigc lotus เท่านั้น')
@@ -60,6 +66,6 @@ def preprocessing(contents):
     imGray = cv2.cvtColor(r_imRGB, cv2.COLOR_BGR2GRAY)
     bin_img = cv2.threshold(imGray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-    cv2.imwrite(image_path, bin_img)
+    cv2.imwrite(image_path, bin_img) #เขียนไฟล์ที่ผ่านการประมวลผลเเล้ว
 
     return bin_img
